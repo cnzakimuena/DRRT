@@ -1,0 +1,162 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+
+\title{Deep Recurrent Relation Transformer}
+\author{Belanger Nzakimuena, C. M.}
+\date{January 2022}
+
+\begin{document}
+
+\maketitle
+
+\noindent A mathematical description of the Deep Recurrent Relation Transformer (DRRT) conscious machine is provided.  DRRT consists of a Deep Relation Transformer (DRT) as implemented by Song et al (2021), enhanced with local recurrence.
+
+\section{Feature Extraction}
+
+\noindent $A = \left\{a_{1}, a_{2}, a_{3}, ..., a_{n}\right\}$ is the features corresponding to the first input $x_{1}$. \\
+\noindent $B = \left\{b_{1}, b_{2}, b_{3}, ..., b_{m}\right\}$ is the features corresponding to the second input $x_{2}$. \\
+
+\noindent Feature extraction stage local recurrence feed-forward equations for $A'$ are given by,
+
+\begin{align}
+h_{t}^{A} &= \sigma_{h}(i_{t}) = \sigma_{h}(U_{h}A_{t}+V_{h}h_{t-1}^{A}+b_{h}) \\
+A'_{t} &= \sigma_{A'}(j_{t}) = \sigma_{a'}(W_{A'}h_{t}^{A}+b_{h})
+\end{align}
+
+where \\
+
+\indent\indent $A_{t}$ is the Local RNN input vector \\
+\indent\indent $h_{t}^{A}$ is the hidden layer output vector \\
+\indent\indent $A'_{t}$ is the Local RNN output vector \\
+\indent\indent $b_{h}$ is the bias vector \\
+\indent\indent $U, W$ are parameter matrices \\
+\indent\indent $V$ is a parameter matrice \\
+\indent\indent $\sigma_{h}, \sigma_{a'}$ are activation functions \\
+
+\noindent Feature extraction stage local recurrence feed-forward ouput $b'$ is calculated in a similar way.
+
+\section{Relation Modules}
+\subsection{Global Relation Module}
+
+\noindent Global relation maps (GRM) for second input $x_{2}$ features $\alpha^{g}$ and for first input $x_{1}$ features $\beta^{g}$ are calculated by,
+
+\begin{align}
+\alpha^{g} &= Softmax\left(\frac{\Psi^{g}(A', B')}{\sqrt{d_{B'}}}\right) \\
+\beta^{g} &= Softmax\left(\frac{\Psi^{g}(A', B')}{\sqrt{d_{A'}}}\right)
+\end{align}
+
+where \\
+
+\indent\indent $d_{B'}$ represents the dimension of $x_{2}$ features \\
+\indent\indent $d_{A'}$ represents the dimension of $x_{1}$ features \\
+
+\noindent The global pairwise function $\Psi^{g}$ is calculated by,
+
+\begin{align}
+\Psi_{ij}^{g}(A', B') &= W_{g}[W_{a'}a'_{i}; W_{b'}b'_{j}] 
+\end{align}
+
+where \\
+
+\indent\indent $a'_{i}$ is the $i$-th first input region, $b'_{j}$ is the $j$-th second input region \\ 
+\indent\indent $W_{g}$, $W_{a'}$ and $W_{b'}$ are weight matrices to be learned \\ 
+\indent\indent $[W_{a'}a'_{i}; W_{b'}b'_{j}]$ denotes the concatenation of $W_{a'}a'_{i}$ and $W_{b'}b'_{j}$ \\
+
+\subsection{Guided Regional Relation Module}
+
+\noindent First and second input features are divided into $K$ regions, \\
+
+\indent\indent $A'^{R} = \left\{A_{1}^{'R}, A_{2}^{'R}, A_{3}^{'R}, ..., A_{K}^{'R}\right\}$ \\ 
+\indent\indent $B'^{R} = \left\{B_{1}^{'R}, B_{2}^{'R}, B_{3}^{'R}, ..., B_{K}^{'R}\right\}$ \\ 
+
+\noindent $B_{k}^{'R}$ and $A_{k}^{'R}$ denote second and first input features in $k$-th corresponding region, \\
+
+where \\
+
+\indent\indent $k \in \left\{1, 2, 3, ..., K\right\}$ is the region index \\
+
+\noindent Regional relation maps for second input features in $k$-th region $\alpha^{r(k)}$ is defined as,
+
+\begin{align}
+\alpha^{r(k)} &= \frac{1}{C_{r}}Softmax\left(\Psi^{r(k)}(A', B')\right)
+\end{align}
+
+\noindent Where $\Psi^{r(k)}(A', B')$ projects the topographic correspondence $B'-A'$ feature vector to a scalar expressed as,
+
+\begin{align}
+\Psi_{ij}^{r(k)} &= R_{ij}^{r(k)}W_{r}[W_{a'}a'_{i}; W_{b'}b'_{j}] 
+\end{align}
+
+with
+
+\begin{align}
+R_{ij}^{r(k)} &= \begin{cases}
+		1, a'_{i} \in A_{k}^{'R} and b'_{j} \in B_{k}^{'R} \\ 
+		0, otherwise
+	\end{cases} 
+\end{align}
+
+\noindent Where region pair factor $R_{ij}^{r(k)}$ is $1$ when $a'_{i}$ and $b'_{j}$ in the $k$-th topographic correspondence region pair or $0$ when they are not in the $k$-th topographic correspondence region. \\
+\noindent $W_{r}$, $W_{a'}$ and $W_{b'}$ are learnable weight vectors which are weight sharing for computing $K$ regional relations. \\
+
+\noindent The normalization factor is given by,
+
+\begin{align}
+C_{r} &= \frac{\sum_{i, j, k}\left(R_{ij}^{r(k)}\right)}{\sqrt{d_{B'}}}
+\end{align}
+
+\noindent Regional relation maps for first input features in $k$-th region $\beta^{r(k)}$ is calculated in a similar way.
+
+\section{Interaction Transformer Module (RNN enhanced)}
+ 
+\noindent Relation modules stage local recurrence feed-forward equations for $\alpha^{'g}$ and $\beta^{'g}$, and $\alpha^{'r(k)}$ and $\beta^{'r(k)}$ are calculated in a similar way as outputs at the feature extraction stage. \\
+
+\noindent The information transformation process can be formulated as,
+
+\begin{align}
+T_{b'\rightarrow a'_{i}}^{\sigma} &= \sum_{\forall j}\alpha_{ij}^{'\sigma}W_{\tilde{b'}}b'_{j} \\
+T_{a'\rightarrow b'_{j}}^{\sigma} &= \sum_{\forall i}\beta_{ij}^{'\sigma}W_{\tilde{a'}}a'_{i}
+\end{align}
+
+where \\
+
+\indent\indent $\sigma \in {g, r(k)}$ \\
+\indent\indent $W_{\tilde{b'}}$ and $W_{\tilde{a'}}$ are weight matrices to be learned \\
+
+The outputs of the information transformation process is combined as,
+
+\begin{align}
+A'_{b'\rightarrow a'} &= Fusion\left(T_{b'\rightarrow a'}^{g}, \sum_{k}T_{b'\rightarrow a'}^{r(k)}\right)W_{t} \\
+B'_{a'\rightarrow b'} &= Fusion\left(T_{a'\rightarrow b'}^{g}, \sum_{k}T_{a'\rightarrow b'}^{r(k)}\right)W_{t}
+\end{align}
+
+where \\
+
+\indent\indent $T_{b'\rightarrow a'}^{g}$ is computed based on the global relation map \\
+\indent\indent $T_{b'\rightarrow a'}^{r(k)}$ is computed based on the $k$-th regional relation map \\
+\indent\indent $W_{t}$ is the parameter matrices to be learned \\
+\indent\indent $W_{t}$ in Eq. $12$ and Eq. $13$ are weight sharing \\
+\indent\indent $A'_{b'\rightarrow a'}$ is the transformed first input features \\
+\indent\indent $B'_{a'\rightarrow b'}$ is the transformed second input features \\
+
+\noindent Three different fusion methods (sum, maxout or contatenation) can be used to combine global and regional representations. \\
+
+\noindent The original and transformed features are combined as the output of the interaction transformer module as,
+
+\begin{align}
+Z_{ab} &= A' + A'_{b'\rightarrow a'} \\
+Z_{ba} &= B' + B'_{a'\rightarrow b'}
+\end{align}
+
+\noindent Second input ($Z_{ba}$) and first input ($Z_{ab}$) representations are combined by average fusion then passed to a three-layer fully connected classifier to generate a classification.
+
+% \begin{equation}
+% \begin{aligned}
+% \frac{1}{N}\sum_{k=0}^{N-1}X_{k}E_{N,k} &= \mathcal{L}^{-1}\left\{f_1(\delta).f_2(\delta)\right\} \\
+% \frac{1}{N}\sum_{k=0}^{N-1}X_{k}E_{N,k} &= \exp(mt) \star \left\{\frac{l}{2\sqrt{\pi t^3}} exp(-l^2/{4t})\right\} \\
+% & = F_1 * F_2
+% \end{aligned}
+% \end{equation}
+
+\end{document}
