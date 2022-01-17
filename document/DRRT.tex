@@ -26,20 +26,20 @@ A'_{t} &= \sigma_{A'}(j_{t}) = \sigma_{A'}(W_{A'}h_{t}^{A}+b_{h})
 
 where \\
 
-\indent\indent $A_{t}$ is the Local RNN input vector \\
+\indent\indent $A_{t}$ is the local RNN input vector \\
 \indent\indent $h_{t}^{A}$ is the hidden layer output vector \\
-\indent\indent $A'_{t}$ is the Local RNN output vector \\
+\indent\indent $A'_{t}$ is the local RNN output vector \\
 \indent\indent $b_{h}$ is the bias vector \\
 \indent\indent $U, W$ are parameter matrices \\
 \indent\indent $V$ is a parameter matrice \\
 \indent\indent $\sigma_{h}, \sigma_{A'}$ are activation functions \\
 
-\noindent Feature extraction stage local recurrence feed-forward ouput $b'$ is calculated in a similar way.
+\noindent Feature extraction stage local recurrence feed-forward ouput $B'$ is calculated in a similar way.
 
 \section{Relation Modules}
 \subsection{Global Relation Module}
 
-\noindent Global relation maps (GRM) for second input $x_{2}$ features $\alpha^{g}$ and for first input $x_{1}$ features $\beta^{g}$ are calculated by,
+\noindent Global relation maps (GRM) for second input features $\alpha^{g}$ and for first input features $\beta^{g}$ are calculated by,
 
 \begin{align}
 \alpha^{g} &= Softmax\left(\frac{\Psi^{g}(A', B')}{\sqrt{d_{B'}}}\right) \\
@@ -48,8 +48,8 @@ where \\
 
 where \\
 
-\indent\indent $d_{B'}$ represents the dimension of $x_{2}$ features \\
-\indent\indent $d_{A'}$ represents the dimension of $x_{1}$ features \\
+\indent\indent $d_{B'}$ represents the dimension of second input features \\
+\indent\indent $d_{A'}$ represents the dimension of first input features \\
 
 \noindent The global pairwise function $\Psi^{g}$ is calculated by,
 
@@ -91,13 +91,13 @@ where \\
 with
 
 \begin{align}
-R_{ij}^{r(k)} &= \begin{cases}
-		1, a'_{i} \in A_{k}^{'R} and b'_{j} \in B_{k}^{'R} \\ 
+R_{ij}^{r(k)} &= \begin{cases} % \, denotes spacing
+		1, a'_{i} \in A_{k}^{'R}\: and\: b'_{j} \in B_{k}^{'R} \\ 
 		0, otherwise
 	\end{cases} 
 \end{align}
 
-\noindent Where region pair factor $R_{ij}^{r(k)}$ is $1$ when $a'_{i}$ and $b'_{j}$ in the $k$-th topographic correspondence region pair or $0$ when they are not in the $k$-th topographic correspondence region. \\
+\noindent Where region pair factor $R_{ij}^{r(k)}$ is $1$ when $a'_{i}$ and $b'_{j}$ are in the $k$-th topographic correspondence region pair or $0$ when they are not in the $k$-th topographic correspondence region. \\
 \noindent $W_{r}$, $W_{a'}$ and $W_{b'}$ are learnable weight vectors which are weight sharing for computing $K$ regional relations. \\
 
 \noindent The normalization factor is given by,
@@ -140,7 +140,7 @@ where \\
 \indent\indent $A'_{b'\rightarrow a'}$ is the transformed first input features \\
 \indent\indent $B'_{a'\rightarrow b'}$ is the transformed second input features \\
 
-\noindent Three different fusion methods (sum, maxout or contatenation) can be used to combine global and regional representations. \\
+\noindent Three different fusion methods (sum, maxout or concatenation) can be used to combine global and regional representations. \\
 
 \noindent The original and transformed features are combined as the output of the interaction transformer module as,
 
