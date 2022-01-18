@@ -1,5 +1,5 @@
 # DRRT
 
-Deep Recurrent Relation Transformer (DRRT) conscious machine (Belanger Nzakimuena, 2022).
+Deep Recurrent Relation Transformer.
 
 ![example image](schematic.png)
