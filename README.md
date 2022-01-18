@@ -1,4 +1,4 @@
-# ConsciousMachine
+# DRRT
 
 DRRT conscious machine (Belanger Nzakimuena, 2022).
 
